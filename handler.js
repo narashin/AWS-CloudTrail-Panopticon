@@ -1,31 +1,30 @@
 'use strict';
-const AWS = require('aws-sdk');
-const { IncomingWebhook } = require('@slack/webhook');
+const {
+    IncomingWebhook
+} = require('@slack/webhook');
 
 module.exports.panopticon = async (event, context, callback) => {
     const webhook = new IncomingWebhook(process.env.SLACK_URL);
-    // const webhook = new IncomingWebhook('https://hooks.slack.com/services/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');
-    // const ec2 = new AWS.EC2();
 
     let ipPermission;
-    if(typeof(event.requestParameters.ipPermissions) === 'undefined'){
+    if (typeof (event.detail.requestParameters.ipPermissions) === 'undefined') {
         ipPermission = '';
-    }else {
-        ipPermission = event.requestParameters.ipPermissions.items;
+    } else {
+        ipPermission = event.detail.requestParameters.ipPermissions.items;
     }
 
     let eventInfo = {
-        "eventName": event.eventName,
-        "eventTime": event.eventTime,
-        "accountId": event.userIdentity.accountId,
-        "userName": event.userIdentity.userName,
-        "sourceIp": event.sourceIPAddress,
-        "awsRegion": event.awsRegion,
-        "sgId": `${typeof (event.requestParameters.groupId) === 'undefined' ? event.responseElements.groupId : event.requestParameters.groupId }`,
+        "eventName": event.detail.eventName,
+        "eventTime": event.detail.eventTime,
+        "accountId": event.detail.userIdentity.accountId,
+        "userName": event.detail.userIdentity.userName,
+        "sourceIp": event.detail.sourceIPAddress,
+        "awsRegion": event.detail.awsRegion,
+        "sgId": `${typeof (event.detail.requestParameters.groupId) === 'undefined' ? event.detail.responseElements.groupId : event.detail.requestParameters.groupId }`,
         "ipPermissions": ipPermission
-    }
+    };
 
-    function formatMessage(eventName){
+    function formatMessage(eventName) {
         let thumbnailImage = '';
         let eventNameDetail = '';
         let emoji = '';
@@ -35,13 +34,13 @@ module.exports.panopticon = async (event, context, callback) => {
         const editImage = 'https://img.icons8.com/color/48/000000/edit-property.png';
         const deleteImage = 'https://img.icons8.com/color/48/000000/delete-property.png';
 
-        switch(eventName){
-            case 'CreateSecurityGroup': 
-                thumbnailImage = createImage; 
+        switch (eventName) {
+            case 'CreateSecurityGroup':
+                thumbnailImage = createImage;
                 eventNameDetail = '보안그룹 생성';
                 break;
-            case 'DeleteSecurityGroup': 
-                thumbnailImage = deleteImage; 
+            case 'DeleteSecurityGroup':
+                thumbnailImage = deleteImage;
                 eventNameDetail = '보안그룹 삭제';
                 break;
             case 'AuthorizeSecurityGroupEgress':
@@ -49,45 +48,53 @@ module.exports.panopticon = async (event, context, callback) => {
                 thumbnailImage = editImage;
                 eventNameDetail = '보안그룹 IP 상세 수정';
                 emoji = ':white_check_mark:';
-                ipListMessage = 
-                                {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "mrkdwn",
-                                        "text": "*Security Group Ip Permissions*"
-                                    },
-                                    "fields": 
-                                        ipList
-                                }
+                ipListMessage = {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Security Group Ip Permissions*"
+                    },
+                    "fields": ipList
+                }
                 break;
             case 'RevokeSecurityGroupEgress':
-            case 'RevokeSecurityGroupIngress': 
-                thumbnailImage = editImage; 
+            case 'RevokeSecurityGroupIngress':
+                thumbnailImage = editImage;
                 emoji = ':x:';
                 eventNameDetail = '보안그룹 IP 상세 수정';
                 ipListMessage = {
-                                    "type": "section",
-                                    "text": {
-                                        "type": "mrkdwn",
-                                        "text": "*Security Group Ip Permissions*"
-                                    },
-                                    "fields": 
-                                        ipList
-                                }
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Security Group Ip Permissions*"
+                    },
+                    "fields": ipList
+                }
                 break;
-        };
-        for(const item of eventInfo.ipPermissions){
+        }
+
+        for (const item of eventInfo.ipPermissions) {
             let ipItself = [];
             let ipDesc = [];
-            for (const info of item.ipRanges.items) {
-                if(info.hasOwnProperty("cidrIp")){
-                    ipItself.push(info["cidrIp"]);
-                    ipDesc.push(info["description"]);
-                }else if(info.hasOwnProperty("groupId")){
-                    ipItself.push(info["groupId"]);
-                    ipDesc.push(info["description"]);
+
+            if (item.ipRanges.hasOwnProperty("items")) {
+                for (const iprangeInfo of item.ipRanges.items) {
+                    ipItself.push(iprangeInfo["cidrIp"]);
+                    ipDesc.push(typeof (iprangeInfo["description"]) === 'undefined' ? '' : iprangeInfo["description"]);
+                }
+            } else if (item.groups.hasOwnProperty("items")) {
+                for (const groupInfo of item.groups.items) {
+                    ipItself.push(groupInfo["groupId"]);
+                    ipDesc.push(typeof (groupInfo["description"]) === 'undefined' ? '' : groupInfo["description"]);
+                }
+            } else if (item.prefixListIds.hasOwnProperty("items")) {
+                for (const prefixInfo of item.prefixListIds.items) {
+                    ipItself.push(prefixInfo["prefixListIds"]);
+                    ipDesc.push(typeof (prefixInfo["description"]) === 'undefined' ? '' : prefixInfo["description"]);
                 }
             }
+
+
             let ipMessage = {
                 "type": "plain_text",
                 "text": `Protocol : ${item.ipProtocol}\nIP : ${item.fromPort} - ${item.toPort}\nSource : ${ipItself.join("\n")}\nDescription : ${ipDesc.join("\n")}`,
@@ -97,14 +104,13 @@ module.exports.panopticon = async (event, context, callback) => {
         }
 
         let slackText = {
-            "blocks": [
-                {
+            "blocks": [{
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
                         "text": `${emoji} SecurityGroup 변경 사항 발생 *(${eventInfo.eventName})*`
                     }
-                }, 
+                },
                 {
                     "type": "section",
                     "text": {
@@ -116,26 +122,27 @@ module.exports.panopticon = async (event, context, callback) => {
                         "image_url": `${thumbnailImage}`,
                         "alt_text": "status thumbnail"
                     }
-                    
+
                 },
                 {
                     "type": "divider"
-                 }
+                }
 
             ]
         }
-        if(Object.keys(ipListMessage).length > 0){
+        if (Object.keys(ipListMessage).length > 0) {
             slackText["blocks"].push(ipListMessage);
         }
         return slackText;
-        
     }
 
+    const message = formatMessage(eventInfo.eventName);
+    await webhook.send(message);
 
-    (async() => {
-        const message = await formatMessage(eventInfo.eventName);
-        await webhook.send(message);
-
-    })();
-
-}
+    return {
+        statusCode: 200,
+        body: JSON.stringify({
+            message: event
+        }, null, 2)
+    }
+};
