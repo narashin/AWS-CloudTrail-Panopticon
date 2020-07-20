@@ -175,7 +175,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/cloudwatch-ec2-sg/dev/1592295176005-2020-06-16T08:12:56.005Z/cloudwatch-ec2-sg.zip"
+                "S3Key": "serverless/cloudwatch-ec2-sg/dev/1592808894320-2020-06-22T06:54:54.320Z/cloudwatch-ec2-sg.zip"
               },
               "FunctionName": "cloudwatch-ec2-sg-dev-panopticon",
               "Handler": "handler.panopticon",
@@ -199,14 +199,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "PanopticonLambdaVersionF8kGxGqP1K7aNhcHGQ7j5tKU9qQ9Ji5gjRAnvqzfv0": {
+          "PanopticonLambdaVersionUCFwkaEHpG6Svbv3QT0OcDqDnCy9Fn2Vx8Gq3JtA": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "PanopticonLambdaFunction"
               },
-              "CodeSha256": "3V2fbSHPtJbWvrkDzP5dOYRRrStAUz/cNhfvJHu93Nk="
+              "CodeSha256": "JTZFKHXdoNcm6lA818mZg6isEsPvJ8WdPW9mzcwaY2A="
             }
           },
           "PanopticonEventsRuleCloudWatchEvent1": {
@@ -276,7 +276,7 @@
           "PanopticonLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "PanopticonLambdaVersionF8kGxGqP1K7aNhcHGQ7j5tKU9qQ9Ji5gjRAnvqzfv0"
+              "Ref": "PanopticonLambdaVersionUCFwkaEHpG6Svbv3QT0OcDqDnCy9Fn2Vx8Gq3JtA"
             }
           }
         }
@@ -387,7 +387,7 @@
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "PanopticonLambdaVersionF8kGxGqP1K7aNhcHGQ7j5tKU9qQ9Ji5gjRAnvqzfv0"
+        "versionLogicalId": "PanopticonLambdaVersionUCFwkaEHpG6Svbv3QT0OcDqDnCy9Fn2Vx8Gq3JtA"
       }
     },
     "serviceFilename": "serverless.yml",
@@ -396,7 +396,7 @@
     "artifact": "/Users/nara/Google Drive/ex-dropbox/projects/cloudtrail-panopticon/.serverless/cloudwatch-ec2-sg.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/cloudwatch-ec2-sg/dev/1592295176005-2020-06-16T08:12:56.005Z",
+    "artifactDirectoryName": "serverless/cloudwatch-ec2-sg/dev/1592808894320-2020-06-22T06:54:54.320Z",
     "artifact": "cloudwatch-ec2-sg.zip"
   }
 }
