@@ -11,7 +11,7 @@ provider:
         - "ec2:DescribeSecurityGroups"
       Resource: "*"
   environment: 
-    SLACK_URL: "https://hooks.slack.com/services/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"
+    SLACK_URL: "<your-slack-webhook>"
 
 functions:
   panopticon:
