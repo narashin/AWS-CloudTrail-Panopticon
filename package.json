@@ -11,6 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "@slack/webhook": "^5.0.3",
-    "aws-sdk": "^2.697.0"
+    "aws-sdk": "^2.814.0"
   }
 }
